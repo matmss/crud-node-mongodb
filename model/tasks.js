@@ -5,7 +5,7 @@ module.exports = function(){
   var task = Schema({
     title: String,
     description: String,
-    status: Boolean
+    status: Boolean,
   });
 
   return db.model('tasks', task);
