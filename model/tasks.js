@@ -1,12 +1,26 @@
-module.exports = function(){
-  var db = require('./../libs/connect_db')();
-  var Schema = require('mongoose').Schema;
+const mongoose = require('mongoose');
 
-  var task = Schema({
-    title: String,
-    description: String,
-    status: Boolean,
-  });
+const taskSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, 'Please add a title'],
+      trim: true,
+      maxlength: [100, 'Title cannot exceed 100 characters'],
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Description cannot exceed 500 characters'],
+    },
+    status: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-  return db.model('tasks', task);
-}
+module.exports = mongoose.model('Task', taskSchema);

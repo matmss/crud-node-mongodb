@@ -1,46 +1,68 @@
 var express = require('express');
 var router = express.Router();
-var model = require('./../model/tasks')();
+var Task = require('./../model/tasks');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  var tit = 'Express';
-
-  if(req.query.title){
-    tit = req.query.title;
+/* GET home page */
+router.get('/', async (req, res, next) => {
+  try {
+    const title = req.query.title || 'Task Manager';
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    res.render('index', { title, tasks });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Error loading tasks', error: err });
   }
-  model.find(null, function(err, tasks){
-    if(err){
-      throw err;
-    }
-    res.render('index', { title: tit, tasks: tasks });
-  });
 });
 
-router.post('/add', function(act, res, next){
-  var body = req.body;
-  body.status = false;
-  model.creat(body, function(err, task){
-    if(err){
-      throw err;
-    }
-    res.redirect('/');
-  })
-});
+/* POST add new task */
+router.post('/add', async (req, res, next) => {
+  try {
+    const { title, description } = req.body;
 
-router.get('/turn/:id', function(req, res, next){
-  var id = req.params.id;
-  model.findbyID(id, function(err, task){
-    if(err){
-      throw err;
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
     }
-    task.status=!task.status;
-    task.save(function(){
-      res.redirect('/');
+
+    const newTask = await Task.create({
+      title,
+      description,
+      status: false,
     });
-  });
-})
 
-// remove ?
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Error creating task', error: err });
+  }
+});
+
+/* GET toggle task status */
+router.get('/toggle/:id', async (req, res, next) => {
+  try {
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    task.status = !task.status;
+    await task.save();
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Error updating task', error: err });
+  }
+});
+
+/* DELETE task */
+router.get('/delete/:id', async (req, res, next) => {
+  try {
+    await Task.findByIdAndDelete(req.params.id);
+    res.redirect('/');
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error', { message: 'Error deleting task', error: err });
+  }
+});
 
 module.exports = router;
