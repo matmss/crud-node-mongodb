@@ -1,12 +1,12 @@
 {
-  "name": "crud",
+  "name": "task-manager",
   "version": "0.3.0",
-  "description": "A modern Node.js MongoDB CRUD application",
+  "description": "A simple task management app built with Node.js, Express, and MongoDB",
   "private": true,
   "type": "commonjs",
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "DEBUG=crud:* npm start"
+    "dev": "DEBUG=task-manager:* npm start"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
